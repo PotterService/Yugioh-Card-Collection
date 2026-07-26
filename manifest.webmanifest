@@ -1,0 +1,9 @@
+{
+  "name": "Bow Yu-Gi-Oh! Collection Manager",
+  "short_name": "Bow Yu-Gi-Oh!",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f6fa",
+  "theme_color": "#101827",
+  "description": "A browser-based Yu-Gi-Oh! collection manager powered by YGOPRODeck."
+}

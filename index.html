@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="A browser-based Yu-Gi-Oh! card collection manager powered by YGOPRODeck.">
+  <title>Bow Yu-Gi-Oh! Collection Manager</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="assets/css/styles.css">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ELQSW0TEBE"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ELQSW0TEBE', {
+  site_name: 'Bow Yu-Gi-Oh! Collection Manager',
+  page_title: document.title,
+  page_location: window.location.href,
+  page_path: window.location.pathname
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+  const clean = value => (value || '').replace(/\s+/g, ' ').trim().slice(0, 180);
+
+  function send(name, extra) {
+    if (typeof gtag !== 'function') return;
+    gtag('event', name, Object.assign({
+      site_name: 'Bow Yu-Gi-Oh! Collection Manager',
+      page_name: document.title,
+      page_path: window.location.pathname,
+      page_url: window.location.href,
+      referrer: document.referrer || 'direct'
+    }, extra || {}));
+  }
+
+  document.addEventListener('click', function (event) {
+    const target = event.target.closest('button, a, label.file-button');
+    if (!target) return;
+
+    const text = clean(target.innerText || target.id || target.getAttribute('aria-label'));
+    const targetPage = target.getAttribute('data-page') || target.getAttribute('data-go') || '';
+
+    send('ui_click', {
+      click_text: text,
+      target_page: targetPage,
+      element_id: target.id || '',
+      element_classes: clean(target.className || '')
+    });
+
+    if (target.matches('.nav-link')) {
+      send('app_navigation', {
+        destination: target.getAttribute('data-page') || text
+      });
+    }
+
+    if (/browse yu-gi-oh|start browsing sets|all sets|browse sets/i.test(text)) {
+      send('browse_sets_clicked', { click_text: text });
+    }
+
+    if (/view collection/i.test(text)) send('view_collection_clicked');
+    if (/add to wishlist/i.test(text)) send('wishlist_add_clicked');
+    if (/remove from collection/i.test(text)) send('collection_remove_clicked');
+    if (/save card/i.test(text)) send('collection_save_clicked');
+    if (/export backup/i.test(text)) send('backup_export_clicked');
+    if (/import backup/i.test(text)) send('backup_import_clicked');
+    if (/export collection csv/i.test(text)) send('collection_csv_export_clicked');
+    if (/clear card cache/i.test(text)) send('card_cache_clear_clicked');
+    if (/erase local collection/i.test(text)) send('collection_reset_clicked');
+  }, true);
+
+  [
+    ['setSearch', 'set_search'],
+    ['cardSearch', 'card_search'],
+    ['collectionSearch', 'collection_search'],
+    ['wishlistSearch', 'wishlist_search']
+  ].forEach(function (entry) {
+    const el = document.getElementById(entry[0]);
+    if (!el) return;
+
+    let started = false;
+    el.addEventListener('input', function () {
+      if (!started) {
+        started = true;
+        send(entry[1] + '_started');
+      }
+    });
+
+    el.addEventListener('change', function () {
+      send(entry[1] + '_completed', {
+        query_length: (el.value || '').length
+      });
+    });
+  });
+
+  [
+    'setSort',
+    'ownedFilter',
+    'cardSort',
+    'collectionSetFilter',
+    'collectionFlagFilter',
+    'conditionName',
+    'languageName'
+  ].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener('change', function () {
+      send('filter_changed', {
+        filter_name: id,
+        filter_value: clean(el.value)
+      });
+    });
+  });
+
+  const ownedForm = document.getElementById('ownedForm');
+  if (ownedForm) {
+    let started = false;
+
+    ownedForm.addEventListener('input', function () {
+      if (!started) {
+        started = true;
+        send('card_edit_started');
+      }
+    }, { once: true });
+
+    ownedForm.addEventListener('submit', function () {
+      send('card_saved', {
+        unlimited_quantity: Number(document.getElementById('unlimitedQuantity')?.value || 0),
+        first_edition_quantity: Number(document.getElementById('firstEditionQuantity')?.value || 0),
+        limited_quantity: Number(document.getElementById('limitedQuantity')?.value || 0),
+        condition: clean(document.getElementById('conditionName')?.value || ''),
+        language: clean(document.getElementById('languageName')?.value || ''),
+        favorite: !!document.getElementById('favorite')?.checked,
+        for_trade: !!document.getElementById('forTrade')?.checked
+      });
+    });
+  }
+
+  const importInput = document.getElementById('importBackupInput');
+  if (importInput) {
+    importInput.addEventListener('change', function () {
+      send('backup_file_selected', {
+        file_count: importInput.files ? importInput.files.length : 0
+      });
+    });
+  }
+});
+</script>
+
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="brand-mark">Y</span>
+      <span><strong>Bow Yu-Gi-Oh!</strong><small>Collection Manager</small></span>
+    </div>
+
+    <nav>
+      <button class="nav-link active" data-page="dashboard"><span>⌂</span> Dashboard</button>
+      <button class="nav-link" data-page="sets"><span>▦</span> Browse Sets</button>
+      <button class="nav-link" data-page="collection"><span>◆</span> My Collection</button>
+      <button class="nav-link" data-page="wishlist"><span>♥</span> Wishlist</button>
+      <button class="nav-link" data-page="scanner"><span>⌾</span> Card Scanner <em>WIP</em></button>
+      <button class="nav-link" data-page="settings"><span>⚙</span> Settings</button>
+    </nav>
+
+    <div class="side-note"><span class="online-dot"></span> Card data powered by YGOPRODeck</div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <button id="menuButton" class="menu-button">☰</button>
+      <div><p class="eyebrow" id="pageEyebrow">Welcome back</p><h1 id="pageTitle">Collection Dashboard</h1></div>
+      <button class="button primary" id="browseSetsButton">Browse Yu-Gi-Oh! Sets</button>
+    </header>
+
+    <section class="content">
+      <section class="page active" id="dashboardPage">
+        <section class="hero">
+          <div>
+            <span class="hero-pill">Bow Duelist Vault</span>
+            <h2>Track every Yu-Gi-Oh! card, printing, rarity, and duplicate.</h2>
+            <p>Browse Yu-Gi-Oh! sets through YGOPRODeck, then mark the exact printings you own.</p>
+            <button class="button primary" data-go="sets">Start Browsing Sets</button>
+          </div>
+          <div class="millennium-orb">✦</div>
+        </section>
+
+        <section class="stats">
+          <article><span>Total Cards</span><strong id="totalCardsStat">0</strong><small>Including duplicates</small></article>
+          <article><span>Unique Printings</span><strong id="uniqueCardsStat">0</strong><small>Different set printings</small></article>
+          <article><span>Sets Started</span><strong id="setsStartedStat">0</strong><small>Sets represented</small></article>
+          <article><span>Estimated Value</span><strong id="estimatedValueStat">$0.00</strong><small>Your entered values</small></article>
+          <article><span>Wishlist</span><strong id="wishlistStat">0</strong><small>Cards you are hunting</small></article>
+        </section>
+
+        <section class="dashboard-grid">
+          <article class="panel">
+            <div class="panel-title"><div><p class="eyebrow">Newest additions</p><h3>Recently Updated</h3></div><button class="text-button" data-go="collection">View collection</button></div>
+            <div id="recentCards" class="recent-list"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-title"><div><p class="eyebrow">Your progress</p><h3>Sets Started</h3></div><button class="text-button" data-go="sets">All sets</button></div>
+            <div id="setProgressList" class="progress-list"></div>
+          </article>
+        </section>
+      </section>
+
+      <section class="page" id="setsPage">
+        <div class="toolbar">
+          <label class="search"><span>⌕</span><input id="setSearch" type="search" placeholder="Search sets or set codes"></label>
+          <select id="setSort"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="name">Name A–Z</option></select>
+        </div>
+        <div id="setsStatus" class="loading">Loading Yu-Gi-Oh! sets…</div>
+        <div id="setsGrid" class="sets-grid"></div>
+      </section>
+
+      <section class="page" id="setDetailPage">
+        <div id="setHero" class="set-hero skeleton"></div>
+        <div class="toolbar">
+          <button class="button secondary" id="backToSets">← All Sets</button>
+          <label class="search"><span>⌕</span><input id="cardSearch" type="search" placeholder="Search this set"></label>
+          <select id="ownedFilter"><option value="">All cards</option><option value="owned">Owned only</option><option value="missing">Missing only</option></select>
+          <select id="cardSort"><option value="number">Set number</option><option value="name">Name A–Z</option><option value="rarity">Rarity</option></select>
+        </div>
+        <div id="cardsStatus" class="loading">Choose a set to begin.</div>
+        <div id="cardsGrid" class="cards-grid"></div>
+        <button class="button secondary load-more" id="loadMoreButton" hidden>Load More Cards</button>
+      </section>
+
+      <section class="page" id="collectionPage">
+        <div class="toolbar">
+          <label class="search"><span>⌕</span><input id="collectionSearch" type="search" placeholder="Search your collection"></label>
+          <select id="collectionSetFilter"><option value="">All Sets</option></select>
+          <select id="collectionFlagFilter"><option value="">All Cards</option><option value="trade">For Trade</option><option value="favorite">Favorites</option><option value="first">First Edition</option></select>
+        </div>
+        <div id="collectionStatus" class="result-count"></div>
+        <div id="collectionGrid" class="cards-grid"></div>
+      </section>
+
+      <section class="page" id="wishlistPage">
+        <div class="toolbar">
+          <label class="search"><span>⌕</span><input id="wishlistSearch" type="search" placeholder="Search wishlist"></label>
+          <button class="button secondary" data-go="sets">Browse Sets</button>
+        </div>
+        <div id="wishlistGrid" class="cards-grid"></div>
+      </section>
+
+      <section class="page" id="scannerPage">
+        <section class="wip-panel">
+          <div class="scanner-graphic"><div>✦</div></div>
+          <span class="wip-badge">Work in Progress</span>
+          <h2>Automatic card scanning is planned for later.</h2>
+          <p>For now, browse sets and mark exact Yu-Gi-Oh! printings manually.</p>
+          <button class="button primary" data-go="sets">Browse Yu-Gi-Oh! Sets</button>
+        </section>
+      </section>
+
+      <section class="page" id="settingsPage">
+        <div class="settings-grid">
+          <article class="panel"><h2>Collection Storage</h2><p>Your collection is saved in this browser using IndexedDB.</p><div class="setting-row"><span>Account required</span><strong class="good">No</strong></div><div class="setting-row"><span>Download required</span><strong class="good">No</strong></div></article>
+          <article class="panel"><h2>Backup and Restore</h2><div class="button-stack"><button class="button primary" id="exportBackupButton">Export Backup</button><label class="button secondary file-button">Import Backup<input id="importBackupInput" type="file" accept=".json" hidden></label><button class="button secondary" id="exportCsvButton">Export Collection CSV</button></div></article>
+          <article class="panel"><h2>API and Image Cache</h2><p>Card data and images are cached in the browser after loading to reduce repeated requests.</p><button class="button secondary" id="clearCacheButton">Clear Card Cache</button></article>
+          <article class="panel danger-panel"><h2>Reset Collection</h2><p>This permanently removes the collection and wishlist from this browser.</p><button class="button danger" id="resetCollectionButton">Erase Local Collection</button></article>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<div class="modal-backdrop" id="ownedModal">
+  <section class="modal">
+    <button class="modal-close" data-close>×</button>
+    <div class="modal-card-head"><img id="modalCardImage" alt=""><div><p class="eyebrow">Collection details</p><h2 id="modalCardName"></h2><p id="modalCardMeta"></p></div></div>
+    <form id="ownedForm" class="form-grid">
+      <input type="hidden" id="modalPrintingId"><input type="hidden" id="modalCardId"><input type="hidden" id="modalSetName"><input type="hidden" id="modalSetCode"><input type="hidden" id="modalImageUrl">
+      <label>Unlimited copies<input id="unlimitedQuantity" type="number" min="0" value="1"></label>
+      <label>First Edition copies<input id="firstEditionQuantity" type="number" min="0" value="0"></label>
+      <label>Limited Edition copies<input id="limitedQuantity" type="number" min="0" value="0"></label>
+      <label>Condition<select id="conditionName"><option>Near Mint</option><option>Lightly Played</option><option>Moderately Played</option><option>Heavily Played</option><option>Damaged</option><option>Graded</option></select></label>
+      <label>Language<select id="languageName"><option>English</option><option>French</option><option>German</option><option>Italian</option><option>Portuguese</option><option>Japanese</option><option>Korean</option><option>Other</option></select></label>
+      <label>Purchase price<input id="purchasePrice" type="number" min="0" step="0.01" value="0"></label>
+      <label>Estimated value<input id="estimatedValue" type="number" min="0" step="0.01" value="0"></label>
+      <label class="check"><input id="favorite" type="checkbox"> Favorite card</label>
+      <label class="check"><input id="forTrade" type="checkbox"> Available for trade</label>
+      <label class="wide">Notes<textarea id="cardNotes" rows="3"></textarea></label>
+      <div class="modal-actions wide"><button id="wishlistButton" class="button secondary" type="button">Add to Wishlist</button><button id="removeOwnedButton" class="button danger" type="button">Remove from Collection</button><button class="button primary" type="submit">Save Card</button></div>
+    </form>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="assets/js/db.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
