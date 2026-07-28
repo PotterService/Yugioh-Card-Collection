@@ -67,6 +67,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (/export backup/i.test(text)) send('backup_export_clicked');
     if (/import backup/i.test(text)) send('backup_import_clicked');
     if (/export collection csv/i.test(text)) send('collection_csv_export_clicked');
+    if (/bow collection hub|all collections|open collection hub/i.test(text)) {
+      send('collection_hub_clicked', { destination: 'https://collection.potterservice.com' });
+    }
     if (/clear card cache/i.test(text)) send('card_cache_clear_clicked');
     if (/erase local collection/i.test(text)) send('collection_reset_clicked');
   }, true);
@@ -159,6 +162,12 @@ document.addEventListener('DOMContentLoaded', function () {
       <span><strong>Bow Yu-Gi-Oh!</strong><small>Collection Manager</small></span>
     </div>
 
+    <a class="collection-hub-link" href="https://collection.potterservice.com" target="_blank" rel="noopener">
+      <span class="hub-icon">✦</span>
+      <span><strong>Bow Collection Hub</strong><small>Explore all collection apps</small></span>
+      <span class="hub-arrow">↗</span>
+    </a>
+
     <nav>
       <button class="nav-link active" data-page="dashboard"><span>⌂</span> Dashboard</button>
       <button class="nav-link" data-page="sets"><span>▦</span> Browse Sets</button>
@@ -175,7 +184,10 @@ document.addEventListener('DOMContentLoaded', function () {
     <header class="topbar">
       <button id="menuButton" class="menu-button">☰</button>
       <div><p class="eyebrow" id="pageEyebrow">Welcome back</p><h1 id="pageTitle">Collection Dashboard</h1></div>
-      <button class="button primary" id="browseSetsButton">Browse Yu-Gi-Oh! Sets</button>
+      <div class="topbar-actions">
+        <a class="button hub-button" href="https://collection.potterservice.com" target="_blank" rel="noopener">All Collections</a>
+        <button class="button primary" id="browseSetsButton">Browse Yu-Gi-Oh! Sets</button>
+      </div>
     </header>
 
     <section class="content">
@@ -188,6 +200,16 @@ document.addEventListener('DOMContentLoaded', function () {
             <button class="button primary" data-go="sets">Start Browsing Sets</button>
           </div>
           <div class="millennium-orb">✦</div>
+        </section>
+
+        <section class="collection-hub-banner">
+          <div class="hub-banner-icon">✦</div>
+          <div>
+            <p class="eyebrow">Bow Collection Hub</p>
+            <h3>Explore all of Bow's collection managers and apps.</h3>
+            <p>Visit the main collection site to browse Pokémon, Magic: The Gathering, Disney Lorcana, One Piece, Yu-Gi-Oh!, and other Bow collection projects.</p>
+          </div>
+          <a class="button hub-button large" href="https://collection.potterservice.com" target="_blank" rel="noopener">Open Collection Hub ↗</a>
         </section>
 
         <section class="stats">

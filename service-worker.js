@@ -1,4 +1,4 @@
-const SHELL='bow-yugioh-shell-v1',IMAGES='bow-yugioh-images-v1',FILES=['./','./index.html','./assets/css/styles.css','./assets/js/db.js','./assets/js/app.js','./manifest.webmanifest'];
+const SHELL='bow-yugioh-shell-v2',IMAGES='bow-yugioh-images-v2',FILES=['./','./index.html','./assets/css/styles.css','./assets/js/db.js','./assets/js/app.js','./manifest.webmanifest'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(SHELL).then(c=>c.addAll(FILES)));self.skipWaiting()});
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>![SHELL,IMAGES].includes(k)).map(k=>caches.delete(k))))));
 self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;const u=new URL(e.request.url);

@@ -47,3 +47,13 @@ Each visitor's browser still needs to fetch an image the first time they view it
 Collection information stays in the visitor's browser. Users should export backups regularly.
 
 This project is not affiliated with or endorsed by Konami or YGOPRODeck.
+
+
+## Bow Collection Hub
+
+This version includes direct links to:
+
+https://collection.potterservice.com
+
+Visitors can use the Bow Collection Hub to discover the other Bow collection managers and apps.
+The link appears in the sidebar, top navigation area, and dashboard.
